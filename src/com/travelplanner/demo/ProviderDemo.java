@@ -29,5 +29,55 @@ public class ProviderDemo {
         List<Itinerary> itineraries = tripPlanner.search(request);
 
         System.out.println("Itineraries generated " + itineraries.size());
+
+        for (int i = 0; i < itineraries.size(); i++) {
+
+            Itinerary itinerary =
+                    itineraries.get(i);
+
+            System.out.println();
+            System.out.println(
+                    "Itinerary " + (i + 1)
+            );
+
+            System.out.println(
+                    "Total cost: "
+                            + itinerary.getTotalCost()
+            );
+
+            System.out.println(
+                    "Total duration: "
+                            + itinerary.getTotalDurationMinutes()
+                            + " minutes"
+            );
+
+            System.out.println(
+                    "Transfers: "
+                            + itinerary.getNumberOfTransfers()
+            );
+
+            if (itinerary.getHotelReservation() != null) {
+
+                System.out.println(
+                        "Hotel: "
+                                + itinerary
+                                .getHotelReservation()
+                                .getHotelName()
+                );
+
+                System.out.println(
+                        "Hotel price: "
+                                + itinerary
+                                .getHotelReservation()
+                                .getPrice()
+                );
+
+            } else {
+
+                System.out.println(
+                        "Hotel: none"
+                );
+            }
+        }
     }
 }

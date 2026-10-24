@@ -35,6 +35,7 @@ public class TripPlanner {
         this.flightProvider = flightProvider;
         this.trainProvider = trainProvider;
         this.cabProvider = new MockCabProviderAdapter();
+        this.hotelProvider = new MockHotelProviderAdapter();
         this.transferBufferMinutes = transferBufferMinutes;
     }
 
@@ -47,6 +48,7 @@ public class TripPlanner {
         this.flightProvider = flightProvider;
         this.trainProvider = trainProvider;
         this.cabProvider = cabProvider;
+        this.hotelProvider = new MockHotelProviderAdapter();
         this.transferBufferMinutes = transferBufferMinutes;
     }
 
@@ -94,6 +96,13 @@ public class TripPlanner {
                 visitedLocations,
                 itineraries
         );
+
+        for (Itinerary itinerary : itineraries) {
+            attachHotelIfValid(
+                    itinerary,
+                    hotels
+            );
+        }
 
         return itineraries;
 
@@ -231,7 +240,6 @@ public class TripPlanner {
             }
         }
     }
-
 
 
 }
