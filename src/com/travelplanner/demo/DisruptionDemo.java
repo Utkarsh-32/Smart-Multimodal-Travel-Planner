@@ -2,10 +2,8 @@ package com.travelplanner.demo;
 
 import com.travelplanner.disruption.Disruption;
 import com.travelplanner.disruption.ReplanningService;
-import com.travelplanner.domain.FlightSegment;
-import com.travelplanner.domain.Itinerary;
-import com.travelplanner.domain.TravelSegment;
-import com.travelplanner.domain.TripRequest;
+import com.travelplanner.domain.*;
+import com.travelplanner.notification.NotificationService;
 import com.travelplanner.planner.TripPlanner;
 import com.travelplanner.provider.MockCabProviderAdapter;
 import com.travelplanner.provider.MockFlightProviderAdapter;
@@ -66,6 +64,8 @@ public class DisruptionDemo {
                 disruption
         );
 
+        NotificationService notificationService = new NotificationService();
+
         System.out.println("Disruption reason: " + disruption.getReason());
 
         System.out.println("Alternative itineraries found: " + alternatives.size());
@@ -107,5 +107,28 @@ public class DisruptionDemo {
             }
         }
 
+        Itinerary replacementItinerary = null;
+
+        if (!alternatives.isEmpty()) {
+            replacementItinerary = alternatives.get(0);
+        }
+
+        Notification notification = notificationService
+                .createDisruptionNotification(
+                    disruption,
+                    replacementItinerary
+                );
+
+        System.out.println();
+
+        System.out.println(
+                "Notification Type: "
+                        + notification.getType()
+        );
+
+        System.out.println(
+                "Notification Message: "
+                        + notification.getMessage()
+        );
     }
 }

@@ -15,10 +15,13 @@ public class Itinerary {
 
     private long totalDurationMinutes;
 
+    private int numberOfTransfers;
+
     public Itinerary() {
         this.segments = new ArrayList<>();
         this.totalCost = BigDecimal.ZERO;
         this.totalDurationMinutes = 0;
+        this.numberOfTransfers = 0;
     }
 
     public void addSegment(TravelSegment segment) {
@@ -42,6 +45,8 @@ public class Itinerary {
                             lastSegment.getArrivalTime()
                     );
         }
+
+        numberOfTransfers = Math.max(0, segments.size() - 1);
     }
 
     public List<TravelSegment>  getSegments() {
@@ -58,5 +63,9 @@ public class Itinerary {
 
     public long getTotalDurationMinutes() {
         return totalDurationMinutes;
+    }
+
+    public int getNumberOfTransfers() {
+        return numberOfTransfers;
     }
 }
