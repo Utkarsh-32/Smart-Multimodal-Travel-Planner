@@ -29,11 +29,22 @@ public class Itinerary {
         recalculateTotals();
     }
 
+    public void setHotelReservation(
+            HotelReservation hotelReservation
+    ) {
+        this.hotelReservation = hotelReservation;
+        recalculateTotals();
+    }
+
     private void recalculateTotals() {
         totalCost = BigDecimal.ZERO;
 
         for (TravelSegment segment : segments) {
             totalCost = totalCost.add(segment.getPrice());
+        }
+
+        if (hotelReservation != null) {
+            totalCost = totalCost.add(hotelReservation.getPrice());
         }
 
         if (!segments.isEmpty()) {

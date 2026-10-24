@@ -25,4 +25,24 @@ public class HotelReservation {
         this.checkOutDate = checkOutDate;
         this.price = price;
     }
+
+    public String getHotelName() {
+        return hotelName;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public LocalDate getCheckInDate() {
+        return checkInDate;
+    }
+
+    public LocalDate getCheckOutDate() {
+        return checkOutDate;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
 }
