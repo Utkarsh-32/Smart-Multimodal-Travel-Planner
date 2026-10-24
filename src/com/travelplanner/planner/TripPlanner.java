@@ -3,9 +3,11 @@ package com.travelplanner.planner;
 import com.travelplanner.domain.*;
 import com.travelplanner.provider.MockCabProviderAdapter;
 import com.travelplanner.provider.MockFlightProviderAdapter;
+import com.travelplanner.provider.MockHotelProviderAdapter;
 import com.travelplanner.provider.MockTrainProviderAdapter;
 import com.travelplanner.ranking.RankingStrategy;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,6 +18,7 @@ public class TripPlanner {
     private MockFlightProviderAdapter flightProvider;
     private MockTrainProviderAdapter trainProvider;
     private MockCabProviderAdapter cabProvider;
+    private MockHotelProviderAdapter hotelProvider;
 
     private long transferBufferMinutes;
 
@@ -47,6 +50,20 @@ public class TripPlanner {
         this.transferBufferMinutes = transferBufferMinutes;
     }
 
+    public TripPlanner(
+            MockFlightProviderAdapter flightProvider,
+            MockTrainProviderAdapter trainProvider,
+            MockCabProviderAdapter cabProvider,
+            MockHotelProviderAdapter hotelProvider,
+            long transferBufferMinutes) {
+
+        this.flightProvider = flightProvider;
+        this.trainProvider = trainProvider;
+        this.cabProvider = cabProvider;
+        this.hotelProvider = hotelProvider;
+        this.transferBufferMinutes = transferBufferMinutes;
+    }
+
     public List<Itinerary> search(TripRequest request) {
         List<Itinerary> itineraries = new ArrayList<>();
         List<TravelSegment> allSegments = new ArrayList<>();
@@ -56,6 +73,9 @@ public class TripPlanner {
         allSegments.addAll(trainProvider.search(request));
 
         allSegments.addAll(cabProvider.search(request));
+
+        List<HotelReservation> hotels = hotelProvider.search(request);
+
 
         List<TravelSegment> currentPath = new ArrayList<>();
 
@@ -173,37 +193,45 @@ public class TripPlanner {
         return rankingStrategy.rank(itineraries);
     }
 
-    private boolean isDirectRoute(
-            TravelSegment segment,
-            TripRequest request
+    private void attachHotelIfValid(
+            Itinerary itinerary,
+            List<HotelReservation> hotels
     ) {
-        return segment.getOrigin().equalsIgnoreCase(request.getOrigin()) &&
-                segment.getDestination().equalsIgnoreCase(request.getDestination());
+        if (itinerary.getSegments().isEmpty()) {
+            return;
+        }
+
+        TravelSegment lastSegment =
+                itinerary.getSegments()
+                        .get(
+                                itinerary.getSegments().size() - 1
+                        );
+
+        LocalDate arrivalDate = lastSegment.getArrivalTime().toLocalDate();
+
+        for (HotelReservation hotel : hotels) {
+            boolean correctLocation =
+                    hotel.getLocation()
+                            .equalsIgnoreCase(
+                                    lastSegment.getDestination()
+                            );
+
+            boolean validCheckIn = hotel.getCheckInDate().isEqual(arrivalDate);
+
+            boolean validStay = hotel.getCheckOutDate()
+                    .isAfter(
+                        hotel.getCheckInDate()
+                    );
+
+            if (correctLocation
+                && validCheckIn
+                && validStay) {
+                itinerary.setHotelReservation(hotel);
+                break;
+            }
+        }
     }
 
-    private boolean canCombine(
-            TravelSegment first,
-            TravelSegment second,
-            TripRequest request
-    ) {
-        boolean startsAtRequstedOrigin =
-                first.getOrigin().equalsIgnoreCase(request.getOrigin());
 
-        boolean segmentsConnect =
-                first.getDestination().equalsIgnoreCase(second.getOrigin());
 
-        boolean endsAtRequestedDestination =
-                second.getDestination().equalsIgnoreCase(request.getDestination());
-
-        boolean enoughTransferTime =
-                !second.getDepartureTime().isBefore(
-                        first.getArrivalTime().
-                                plusMinutes(transferBufferMinutes)
-                );
-
-        return startsAtRequstedOrigin
-                && segmentsConnect
-                && endsAtRequestedDestination
-                && enoughTransferTime;
-    }
 }
