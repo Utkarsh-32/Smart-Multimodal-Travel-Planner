@@ -1,5 +1,6 @@
 package com.travelplanner.demo;
 
+import com.travelplanner.booking.BookingFacade;
 import com.travelplanner.domain.*;
 import com.travelplanner.planner.TripPlanner;
 import com.travelplanner.provider.MockCabProviderAdapter;
@@ -72,8 +73,61 @@ public class TravelPlannerDemo {
                             + (i + 1)
                             + " -----"
             );
-            printItinerary(itineraries.get(i));
+            printItinerary(rankedItineraries.get(i));
         }
+
+        if (rankedItineraries.isEmpty()) {
+
+            System.out.println();
+            System.out.println(
+                    "No itinerary available for booking."
+            );
+
+            return;
+        }
+
+        Itinerary selectedItinerary =
+                rankedItineraries.get(0);
+
+        System.out.println();
+        System.out.println(
+                "=== Selected Itinerary ==="
+        );
+
+        printItinerary(
+                selectedItinerary
+        );
+
+        BookingFacade bookingFacade =
+                new BookingFacade(
+                        flightProvider,
+                        trainProvider,
+                        cabProvider,
+                        hotelProvider
+                );
+
+        Booking booking =
+                bookingFacade.book(
+                        "B001",
+                        selectedItinerary
+                );
+
+        System.out.println();
+
+        System.out.println(
+                "=== Booking Result ==="
+        );
+
+        System.out.println(
+                "Booking ID: "
+                        + booking.getBookingId()
+        );
+
+        System.out.println(
+                "Booking Status: "
+                        + booking.getStatus()
+        );
+
     }
 
     private static void printItinerary(Itinerary itinerary) {
