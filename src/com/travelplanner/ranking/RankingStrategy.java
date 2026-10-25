@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface RankingStrategy {
     List<Itinerary> rank(List<Itinerary> itineraries);
+
 }

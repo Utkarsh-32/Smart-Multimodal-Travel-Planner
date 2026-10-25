@@ -6,6 +6,7 @@ import com.travelplanner.provider.MockCabProviderAdapter;
 import com.travelplanner.provider.MockFlightProviderAdapter;
 import com.travelplanner.provider.MockHotelProviderAdapter;
 import com.travelplanner.provider.MockTrainProviderAdapter;
+import com.travelplanner.ranking.BalancedStrategy;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -50,13 +51,21 @@ public class TravelPlannerDemo {
 
         List<Itinerary> itineraries = tripPlanner.search(request);
 
+        tripPlanner.setRankingStrategy(new BalancedStrategy());
+
+        List<Itinerary> rankedItineraries = tripPlanner.rankItineraries(itineraries);
+
         System.out.println();
         System.out.println(
-                "Itineraries found: "
-                        + itineraries.size()
+                "Ranking Strategy: BALANCED"
         );
 
-        for (int i = 0; i < itineraries.size(); i++) {
+        System.out.println(
+                "Itineraries found: "
+                        + rankedItineraries.size()
+        );
+
+        for (int i = 0; i < rankedItineraries.size(); i++) {
             System.out.println();
             System.out.println(
                     "----- Itinerary "
