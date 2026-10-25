@@ -6,15 +6,18 @@ public class BookingFacade {
     private ProviderAdapter<FlightSegment> flightProvider;
     private ProviderAdapter<TrainSegment> trainProvider;
     private ProviderAdapter<CabSegment> cabProvider;
+    private ProviderAdapter<HotelReservation> hotelProvider;
 
     public BookingFacade (
             ProviderAdapter<FlightSegment> flightProvider,
             ProviderAdapter<TrainSegment> trainProvider,
-            ProviderAdapter<CabSegment> cabProvider
+            ProviderAdapter<CabSegment> cabProvider,
+            ProviderAdapter<HotelReservation> hotelProvider
     ) {
         this.flightProvider = flightProvider;
         this.trainProvider = trainProvider;
         this.cabProvider = cabProvider;
+        this.hotelProvider = hotelProvider;
     }
 
     public Booking book(
@@ -27,9 +30,20 @@ public class BookingFacade {
 
         int totalReservations = itinerary.getSegments().size();
 
+        if (itinerary.getHotelReservation() != null) {
+            totalReservations++;
+        }
+
         for (TravelSegment segment : itinerary.getSegments()) {
             boolean success = reserveSegment(segment);
             if (success) {
+                successfulReservations++;
+            }
+        }
+
+        if (itinerary.getHotelReservation() != null) {
+            boolean hotelSuccess = hotelProvider.reserve(itinerary.getHotelReservation());
+            if (hotelSuccess) {
                 successfulReservations++;
             }
         }
@@ -71,6 +85,21 @@ public class BookingFacade {
                 allCancelled = false;
             }
         }
+
+        if (booking.getItinerary()
+                .getHotelReservation() != null) {
+
+            boolean hotelCancelled =
+                    hotelProvider.cancel(
+                            booking.getItinerary()
+                                    .getHotelReservation()
+                    );
+
+            if (!hotelCancelled) {
+                allCancelled = false;
+            }
+        }
+
         if (allCancelled) {
             booking.updateStatus(BookingStatus.CANCELLED);
         }

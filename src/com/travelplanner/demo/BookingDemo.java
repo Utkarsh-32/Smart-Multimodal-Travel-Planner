@@ -4,6 +4,7 @@ import com.travelplanner.booking.BookingFacade;
 import com.travelplanner.domain.*;
 import com.travelplanner.provider.MockCabProviderAdapter;
 import com.travelplanner.provider.MockFlightProviderAdapter;
+import com.travelplanner.provider.MockHotelProviderAdapter;
 import com.travelplanner.provider.MockTrainProviderAdapter;
 
 import java.math.BigDecimal;
@@ -59,7 +60,8 @@ public class BookingDemo {
         BookingFacade facade = new BookingFacade(
                 new MockFlightProviderAdapter(true),
                 new MockTrainProviderAdapter(true),
-                new MockCabProviderAdapter(true)
+                new MockCabProviderAdapter(true),
+                new MockHotelProviderAdapter(true)
         );
 
         Booking booking = facade.book("B001", itinerary);
@@ -87,7 +89,8 @@ public class BookingDemo {
                 new BookingFacade(
                         new MockFlightProviderAdapter(true),
                         new MockTrainProviderAdapter(false),
-                        new MockCabProviderAdapter(true)
+                        new MockCabProviderAdapter(true),
+                        new MockHotelProviderAdapter(false)
                 );
 
         Booking booking =
@@ -107,7 +110,8 @@ public class BookingDemo {
                 new BookingFacade(
                         new MockFlightProviderAdapter(false),
                         new MockTrainProviderAdapter(false),
-                        new MockCabProviderAdapter(false)
+                        new MockCabProviderAdapter(false),
+                        new MockHotelProviderAdapter(false)
                 );
 
         Booking booking =
