@@ -1,7 +1,10 @@
 package com.travelplanner.demo;
 
 import com.travelplanner.booking.BookingFacade;
+import com.travelplanner.disruption.Disruption;
+import com.travelplanner.disruption.ReplanningService;
 import com.travelplanner.domain.*;
+import com.travelplanner.notification.NotificationService;
 import com.travelplanner.planner.TripPlanner;
 import com.travelplanner.provider.MockCabProviderAdapter;
 import com.travelplanner.provider.MockFlightProviderAdapter;
@@ -128,6 +131,88 @@ public class TravelPlannerDemo {
                         + booking.getStatus()
         );
 
+        System.out.println();
+        System.out.println(
+                "=== Simulated Disruption ==="
+        );
+
+        Itinerary disruptedItinerary = null;
+        FlightSegment disruptedFlight = null;
+
+        for (Itinerary itinerary : rankedItineraries) {
+            for (TravelSegment segment : itinerary.getSegments()) {
+                if (segment instanceof FlightSegment flight
+                    && flight.getFlightNumber()
+                        .equalsIgnoreCase("AI777"))
+                {
+                    disruptedItinerary = itinerary;
+                    disruptedFlight = flight;
+                    break;
+                }
+            }
+
+            if (disruptedFlight != null) {
+                break;
+            }
+        }
+        if (disruptedFlight != null) {
+            System.out.println(
+                    "Disrupted flight: "
+                            + disruptedFlight.getFlightNumber()
+                            + " | "
+                            + disruptedFlight.getOrigin()
+                            + " -> "
+                            + disruptedFlight.getDestination()
+            );
+
+            Disruption disruption = new Disruption(disruptedFlight, "Flight Cancelled");
+            ReplanningService replanningService = new ReplanningService(tripPlanner);
+
+            List<Itinerary> alternatives = replanningService.replan(request, disruption);
+
+            System.out.println(
+                    "Replacement itineraries found: "
+                            + alternatives.size()
+            );
+
+            Itinerary replacementItinerary = null;
+
+            if (!alternatives.isEmpty()){
+                replacementItinerary = alternatives.get(0);
+                System.out.println();
+                System.out.println(
+                        "=== Replacement Itinerary ==="
+                );
+                printItinerary(
+                        replacementItinerary
+                );
+            }
+
+            NotificationService notificationService = new NotificationService();
+
+            Notification notification = notificationService.createDisruptionNotification(
+                    disruption,
+                    replacementItinerary
+            );
+
+            System.out.println();
+            System.out.println(
+                    "=== Traveler Notification ==="
+            );
+
+            System.out.println(
+                    "Type: "
+                            + notification.getType()
+            );
+
+            System.out.println(
+                    notification.getMessage()
+            );
+        } else {
+            System.out.println(
+                    "No AI777 flight found for disruption demo."
+            );
+        }
     }
 
     private static void printItinerary(Itinerary itinerary) {
