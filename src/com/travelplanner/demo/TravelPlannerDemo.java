@@ -133,7 +133,7 @@ public class TravelPlannerDemo {
         );
 
         System.out.println();
-        System.out.println("===Booking Storage===");
+        System.out.println("=== Booking Storage ===");
 
         BookingRepository bookingRepository = new BookingRepository();
 
@@ -171,7 +171,11 @@ public class TravelPlannerDemo {
 
         System.out.println();
         System.out.println(
-                "=== Simulated Disruption ==="
+                "=== Separate Disruption Scenario ==="
+        );
+
+        System.out.println(
+                "Demonstrating disruption handling on an itinerary containing flight AI777."
         );
 
         Itinerary disruptedItinerary = null;
@@ -194,6 +198,15 @@ public class TravelPlannerDemo {
             }
         }
         if (disruptedFlight != null) {
+            System.out.println();
+            System.out.println(
+                    "=== Affected Itinerary ==="
+            );
+
+            printItinerary(disruptedItinerary);
+
+            System.out.println();
+
             System.out.println(
                     "Disrupted flight: "
                             + disruptedFlight.getFlightNumber()
@@ -219,7 +232,7 @@ public class TravelPlannerDemo {
                 replacementItinerary = alternatives.get(0);
                 System.out.println();
                 System.out.println(
-                        "=== Replacement Itinerary ==="
+                        "=== Replacement For Remaining Journey ==="
                 );
                 printItinerary(
                         replacementItinerary
