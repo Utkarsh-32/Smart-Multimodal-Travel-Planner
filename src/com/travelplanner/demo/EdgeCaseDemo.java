@@ -10,11 +10,13 @@ import com.travelplanner.provider.MockCabProviderAdapter;
 import com.travelplanner.provider.MockFlightProviderAdapter;
 import com.travelplanner.provider.MockHotelProviderAdapter;
 import com.travelplanner.provider.MockTrainProviderAdapter;
+import com.travelplanner.repository.BookingRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public class EdgeCaseDemo {
     public static void main(String[] args) {
@@ -27,6 +29,8 @@ public class EdgeCaseDemo {
         testCompleteBookingFailure();
         System.out.println();
         testDisruptionWithNoReplacement();
+        System.out.println();
+        testBookingNotFound();
     }
 
     private static void testNoRoute() {
@@ -579,6 +583,28 @@ public class EdgeCaseDemo {
                 "Notification message: "
                         + notification.getMessage()
         );
+    }
+
+    private static void testBookingNotFound() {
+        BookingRepository bookingRepository = new BookingRepository();
+
+        System.out.println(
+                "=== Test: Booking Not Found ==="
+        );
+
+        Optional<Booking> result = bookingRepository.findById(
+                "UNKNOWN-ID"
+        );
+
+        if (result.isEmpty()) {
+            System.out.println(
+                    "PASS: Unknown booking ID returned no result."
+            );
+        } else {
+            System.out.println(
+                    "FAIL: Unexpected booking was returned."
+            );
+        }
     }
 
 
