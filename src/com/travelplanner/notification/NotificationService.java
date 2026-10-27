@@ -57,6 +57,8 @@ public class NotificationService {
                                 + replacement.getDepartureTime()
                 );
             }
+        } else {
+            message.append("No replacement itinerary was found.");
         }
 
         return new Notification(
