@@ -11,6 +11,7 @@ import com.travelplanner.provider.MockFlightProviderAdapter;
 import com.travelplanner.provider.MockHotelProviderAdapter;
 import com.travelplanner.provider.MockTrainProviderAdapter;
 import com.travelplanner.ranking.BalancedStrategy;
+import com.travelplanner.repository.BookingRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -130,6 +131,43 @@ public class TravelPlannerDemo {
                 "Booking Status: "
                         + booking.getStatus()
         );
+
+        System.out.println();
+        System.out.println("===Booking Storage===");
+
+        BookingRepository bookingRepository = new BookingRepository();
+
+        bookingRepository.save(booking);
+
+        System.out.println(
+                "Booking saved with ID: "
+                        + booking.getBookingId()
+        );
+
+        bookingRepository
+                .findById(
+                        booking.getBookingId()
+                )
+                        .ifPresentOrElse(
+                                storedBooking -> {
+                                    System.out.println(
+                                            "Stored booking found."
+                                    );
+
+                                    System.out.println(
+                                            "Booking ID: "
+                                                    + storedBooking.getBookingId()
+                                    );
+
+                                    System.out.println(
+                                            "Status: "
+                                                    + storedBooking.getStatus()
+                                    );
+                                },
+                                () -> {
+                                    System.out.println("Stored booking not found.");
+                                }
+                        );
 
         System.out.println();
         System.out.println(

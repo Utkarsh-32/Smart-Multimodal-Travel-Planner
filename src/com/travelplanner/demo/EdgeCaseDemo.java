@@ -1,7 +1,10 @@
 package com.travelplanner.demo;
 
 import com.travelplanner.booking.BookingFacade;
+import com.travelplanner.disruption.Disruption;
+import com.travelplanner.disruption.ReplanningService;
 import com.travelplanner.domain.*;
+import com.travelplanner.notification.NotificationService;
 import com.travelplanner.planner.TripPlanner;
 import com.travelplanner.provider.MockCabProviderAdapter;
 import com.travelplanner.provider.MockFlightProviderAdapter;
@@ -22,6 +25,8 @@ public class EdgeCaseDemo {
         testPartialBookingFailure();
         System.out.println();
         testCompleteBookingFailure();
+        System.out.println();
+        testDisruptionWithNoReplacement();
     }
 
     private static void testNoRoute() {
@@ -430,6 +435,150 @@ public class EdgeCaseDemo {
             );
         }
 
+    }
+
+    private static void testDisruptionWithNoReplacement() {
+
+        MockFlightProviderAdapter flightProvider =
+                new MockFlightProviderAdapter();
+
+        MockTrainProviderAdapter trainProvider =
+                new MockTrainProviderAdapter();
+
+        MockCabProviderAdapter cabProvider =
+                new MockCabProviderAdapter();
+
+        MockHotelProviderAdapter hotelProvider =
+                new MockHotelProviderAdapter();
+
+        TripPlanner tripPlanner =
+                new TripPlanner(
+                        flightProvider,
+                        trainProvider,
+                        cabProvider,
+                        hotelProvider,
+                        60
+                );
+
+        TripRequest request =
+                new TripRequest(
+                        "Delhi",
+                        "Mumbai",
+                        LocalDate.of(2026, 11, 10),
+                        null,
+                        new BigDecimal("10000"),
+                        List.of("BALANCED")
+                );
+
+        List<Itinerary> itineraries =
+                tripPlanner.search(request);
+
+        FlightSegment disruptedFlight = null;
+
+        for (Itinerary itinerary : itineraries) {
+
+            for (TravelSegment segment
+                    : itinerary.getSegments()) {
+
+                if (segment instanceof FlightSegment flight
+                        && flight.getFlightNumber()
+                        .equalsIgnoreCase("6E999")) {
+
+                    disruptedFlight = flight;
+                    break;
+                }
+            }
+
+            if (disruptedFlight != null) {
+                break;
+            }
+        }
+
+        System.out.println(
+                "=== Test: Disruption With No Replacement ==="
+        );
+
+        if (disruptedFlight == null) {
+
+            System.out.println(
+                    "FAIL: Disruption test flight was not found."
+            );
+
+            return;
+        }
+
+        System.out.println(
+                "Disrupted segment: "
+                        + disruptedFlight.getOrigin()
+                        + " -> "
+                        + disruptedFlight.getDestination()
+        );
+
+        System.out.println(
+                "Flight: "
+                        + disruptedFlight.getFlightNumber()
+        );
+
+        System.out.println(
+                "Departure: "
+                        + disruptedFlight.getDepartureTime()
+        );
+
+        Disruption disruption =
+                new Disruption(
+                        disruptedFlight,
+                        "Flight cancelled"
+                );
+
+        ReplanningService replanningService =
+                new ReplanningService(tripPlanner);
+
+        List<Itinerary> alternatives =
+                replanningService.replan(
+                        request,
+                        disruption
+                );
+
+        System.out.println();
+        System.out.println(
+                "Replacement routes found: "
+                        + alternatives.size()
+        );
+        System.out.println();
+
+        if (alternatives.isEmpty()) {
+
+            System.out.println(
+                    "PASS: No valid replacement exists after the disruption."
+            );
+
+        } else {
+
+            System.out.println(
+                    "FAIL: Unexpected replacement route was found."
+            );
+        }
+
+        NotificationService notificationService = new NotificationService();
+
+        Itinerary replacementItinerary = alternatives.isEmpty() ? null : alternatives.get(0);
+
+        Notification notification = notificationService.createDisruptionNotification(
+                disruption,
+                replacementItinerary
+        );
+
+        System.out.println();
+
+        System.out.println(
+                "Notification type: "
+                        + notification.getType()
+        );
+
+        System.out.println(
+                "Notification message: "
+                        + notification.getMessage()
+        );
     }
 
 
