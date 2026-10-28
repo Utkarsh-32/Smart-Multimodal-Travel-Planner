@@ -9,10 +9,7 @@ import com.travelplanner.ranking.RankingStrategy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class TripPlanner {
     private MockFlightProviderAdapter flightProvider;
@@ -81,7 +78,7 @@ public class TripPlanner {
 
         List<TravelSegment> currentPath = new ArrayList<>();
 
-        Set<String> visitedLocations  = new HashSet<>();
+        Set<String> visitedLocations  = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
         visitedLocations.add(request.getOrigin());
 
@@ -104,6 +101,21 @@ public class TripPlanner {
             );
         }
 
+        itineraries.removeIf(itinerary ->
+                        !itinerary.getSegments()
+                                .get(0)
+                                .getDepartureTime()
+                                .toLocalDate()
+                                .equals(request.getDepartureDate())
+        );
+
+        if (request.getBudget() != null) {
+            itineraries.removeIf(itinerary ->
+                    itinerary.getTotalCost()
+                            .compareTo(request.getBudget()) > 0
+            );
+        }
+
         return itineraries;
 
     }
@@ -117,7 +129,7 @@ public class TripPlanner {
             Set<String> visitedLocations,
             List<Itinerary> itineraries
     ) {
-        if (currentPath.size() > MAX_SEGMENTS) {
+        if (currentPath.size() >= MAX_SEGMENTS) {
             return;
         }
 

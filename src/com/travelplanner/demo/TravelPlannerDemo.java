@@ -11,11 +11,14 @@ import com.travelplanner.provider.MockFlightProviderAdapter;
 import com.travelplanner.provider.MockHotelProviderAdapter;
 import com.travelplanner.provider.MockTrainProviderAdapter;
 import com.travelplanner.ranking.BalancedStrategy;
+import com.travelplanner.ranking.CheapestStrategy;
+import com.travelplanner.ranking.FastestStrategy;
 import com.travelplanner.repository.BookingRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 public class TravelPlannerDemo {
     public static void main(String[] args) {
@@ -51,18 +54,41 @@ public class TravelPlannerDemo {
                         LocalDate.of(2026, 11, 10),
                         null,
                         new BigDecimal("10000"),
-                        List.of("BALANCED")
+                        List.of("FASTEST")
                 );
 
         List<Itinerary> itineraries = tripPlanner.search(request);
 
-        tripPlanner.setRankingStrategy(new BalancedStrategy());
+        List<String> preferences = request.getPreferences();
+
+        String preference = preferences == null || preferences.isEmpty() ? "BALANCED" : preferences.get(0);
+
+        if (preferences == null) {
+            throw new IllegalArgumentException("Ranking preferences cannot be null");
+        }
+
+        preference = preference.trim().toUpperCase(Locale.ROOT);
+
+        switch (preference) {
+            case "CHEAPEST" ->
+                tripPlanner.setRankingStrategy(new CheapestStrategy());
+            case "FASTEST" ->
+                tripPlanner.setRankingStrategy(new FastestStrategy());
+            case "BALANCED" ->
+                tripPlanner.setRankingStrategy(new BalancedStrategy());
+            default ->
+                throw new IllegalArgumentException(
+                        "Unsupported ranking preference: " + preference
+                );
+        }
+
+
 
         List<Itinerary> rankedItineraries = tripPlanner.rankItineraries(itineraries);
 
         System.out.println();
         System.out.println(
-                "Ranking Strategy: BALANCED"
+                "Ranking Strategy: " + preference
         );
 
         System.out.println(

@@ -3,6 +3,7 @@ package com.travelplanner.domain;
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Itinerary {
@@ -61,7 +62,7 @@ public class Itinerary {
     }
 
     public List<TravelSegment>  getSegments() {
-        return segments;
+        return Collections.unmodifiableList(segments);
     }
 
     public HotelReservation getHotelReservation() {
